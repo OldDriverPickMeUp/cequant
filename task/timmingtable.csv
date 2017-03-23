@@ -1,0 +1,10 @@
+id,keyname,desc
+5000,technital.2070000060.ATR_21_2dot5,波动率
+5001,technital.2070000060.BOLL_20_1dot5_1dot5,BOLL线
+5002,technital.2070000060.FASTMA_5_20,短均线
+5003,technital.2070000060.KDJ_21_13_13,KDJ
+5004,technital.2070000060.RSI_10_16_85,相对强弱
+5005,technital.2070000060.SLOWMA_8_34,长均线
+5006,technital.2070000060.TURTLE_55_21,海龟法则
+5007,technital.2070000060.VOL_55_1dot5,交易量
+5008,technital.2070000060.DEFAULTBUY_1,默认买入

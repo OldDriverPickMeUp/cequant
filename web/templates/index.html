@@ -1,0 +1,192 @@
+{% extends "testmain.html" %}
+{% block page_title %}
+<title>任务列表</title>
+{% end %}
+
+{% block page_add_js %}
+<script>
+var getsuburl='/api/getsubtask'
+        function load_instruct(id,name){
+            var requestdata={'instruct_id':id}
+            $.get(getsuburl,requestdata,function(data){
+                if(data['status']==='success'){
+                    var recv=data['responce']['subtasks'];
+                    var showhtml = "<table class='table table-striped'><tr><th>任务名</th><th>状态</th><th>用时</th><th>信息</th></tr>"
+                    for(var i=0;i<recv.length;++i){
+                        showhtml+=sub_generate_row(recv[i]);
+                        }
+                    showhtml+="</table>"
+                    $('#subtaskshow').html(showhtml);
+                    $('#myModalLabel').html(id+'&nbsp;&nbsp;&nbsp;&nbsp;'+name)
+                    $('#myModal').modal()
+                 }
+                else{
+                        alert(data['msg']);}
+                })
+        }
+        function sub_generate_row(rowobj){
+                var name=rowobj['name'];
+                var running=rowobj['running time'];
+                var message=rowobj['message'].replace(/\n/g,'</p><p>').replace(/\s/g, '&nbsp;&nbsp;');
+                message = '<p>'+message+'</p>'
+                var status = rowobj['status'];
+                return "<tr><td>"+name+"</td><td>"+status+"</td><td>"+running+"</td><td>"+message+"</td>";
+        }
+    $(document).ready(function(){
+           function generate_row(rowobj){
+                var id=rowobj['id']
+
+                var name=rowobj['taskname'];
+                var rate=rowobj['rate of process'];
+                var running=rowobj['running time'];
+                var receipt=rowobj['receipt'];
+                var status = rowobj['status']
+                var row_html="<tr onclick='load_instruct("+id+",&quot;"+name+"&quot;)'><td>"+id+"</td><td>"+name+"</td><td>"+status+"</td><td>"+rate+"</td><td>"+running+"</td><td>"+receipt+"</td>";
+                return row_html;
+           }
+            //var MyDate=new Date();
+            //    var mymonth = MyDate.getMonth();
+            //    var myday = MyDate.getDate().toString();
+            //    mymonth +=1;
+            //    mymonth=mymonth<10?'0'+mymonth.toString():mymonth.toString();
+            //    var time=MyDate.getFullYear().toString()+mymonth+myday;
+
+
+
+
+        //check
+          var checkurl='/api/check'
+        function load_check(page){
+             var requestdata={'page':page}
+
+                $.get(checkurl,requestdata,function(data){
+                if(data['status']==='success'){
+                    var recv=data['responce']['instructlist'];
+
+                    if(recv.length<=0&&page>0){
+                        alert('到头了');
+                        return;
+                    }
+                    else{
+                        var order_html="<tr><th>id</th><th>任务名</th><th>状态</th><th>进度</th><th>用时</th><th>回执</th></tr>";
+                        for(var i=0;i<recv.length;++i){
+                            order_html+=generate_row(recv[i]);
+                        }
+                        $('#showtable').html(order_html);
+                        refresh_page(page);
+                    }
+                 }
+                else{
+                        alert(data['msg']);}
+                })
+        }
+        load_check(0);
+
+        function refresh_page(now_page){
+        $('#page_cnt').attr('showpage',now_page)
+        var page = $('#page_cnt').attr('showpage');
+        $('#pageshower').html('PAGE--'+page);
+        }
+
+        $('#refresh_check').click(function(){
+            var page=Number($('#page_cnt').attr('showpage'));
+            if(isNaN(page)){
+                alert('出错了，请刷新页面');
+                return;
+               }
+            load_check(page);
+        });
+        $('#previous_page').click(function(){
+            var page=Number($('#page_cnt').attr('showpage'));
+            if(isNaN(page)){
+                alert('出错了，请刷新页面');
+                return;
+               }
+            if(page<=0){alert('页数到头了');
+            return;}
+            page-=1;
+
+            load_check(page);
+        });
+        $('#next_page').click(function(){
+            var page=Number($('#page_cnt').attr('showpage'));
+            if(isNaN(page)){
+                alert('出错了，请刷新页面');
+                return;
+               }
+            page+=1;
+
+            load_check(page);
+        });
+
+
+
+
+    })
+</script>
+{% end %}
+
+{% block page_navigator %}
+
+    <ul class="nav nav-pills">
+         <li>
+        <a href="/index.html">返回</a>
+    </li>
+    <li >
+        <a href="/errorlist.html">错误列表</a>
+    </li>
+        <li class="active" id="refresh_check">
+        <a href="javascript:void(0);">任务列表<small>(点击刷新)</small></a>
+    </li>
+</ul>
+{% end %}
+
+
+
+
+
+{% block page_body %}
+<div class="row clearfix">
+    <div class="col-xs-12 column" >
+        <div class="row clearfix">
+    <div class="col-xs-12 column">
+        <nav aria-label="...">
+  <ul class="pager" id="page_cnt" showpage="0">
+    <li class="previous"><a href="javascript:void(0)" id="previous_page"><span aria-hidden="true">&larr;</span> Older</a></li>
+      <li ><a href="javascript:void(0)" id="pageshower">PAGE--0</a></li>
+    <li class="next"><a href="javascript:void(0)" id="next_page">Newer <span aria-hidden="true">&rarr;</span></a></li>
+  </ul>
+</nav>
+
+
+        <table class="table table-hover" id="showtable">
+            <tr><th>id</th><th>任务名</th><th>状态</th><th>进度</th><th>用时</th><th>回执</th></tr>
+        </table>
+
+        </div>
+            </div>
+    </div>
+</div>
+
+
+{% end %}
+
+{% block page_info %}
+<div class="modal fade bs-example-modal-lg" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+  <div class="modal-dialog modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title" id="myModalLabel">Modal title</h4>
+      </div>
+      <div class="modal-body" id="subtaskshow">
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+        <!--<button type="button" class="btn btn-primary">Save changes</button>-->
+      </div>
+    </div>
+  </div>
+</div>
+<br>
+{% end %}
